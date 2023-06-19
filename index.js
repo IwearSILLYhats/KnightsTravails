@@ -1,3 +1,5 @@
+let visited;
+
 function buildBoard (){
     const board = document.querySelector('.board');
     for (i = 0; i < 8; i++){
@@ -13,25 +15,59 @@ function buildBoard (){
 }
 
 function findMoves ([x,y]){
-    const potentialMoves = [[2,1], [2,-1], [1,2], [-1,2], [-2,1], [-2,-1], [1,-2], [-1,-2]];
-    let possibleMoves = [];
-    potentialMoves.forEach(move =>{
-        let newX = x + move[0];
-        let newY = y + move[1];
-        if (newX >= 0 && newX <= 8 && newY >= 0 && newY <= 8 ) {
-            possibleMoves.push([newX, newY]);
+    try {        
+        const potentialMoves = [[2,1], [2,-1], [1,2], [-1,2], [-2,1], [-2,-1], [1,-2], [-1,-2]];
+        let possibleMoves = [];
+        potentialMoves.forEach(move =>{
+            let newX = x + move[0];
+            let newY = y + move[1];
+            if (newX >= 0 && newX <= 7 && newY >= 0 && newY <= 7 ) {
+                if (visited[newX][newY] === 0) {
+                    possibleMoves.push([newX, newY]);
+                    visited[newX][newY] = 1;
+                }
+            }
+        });
+        if (possibleMoves.length === 0) {
+            console.log('no valid moves for this square',[x,y]);
+            return false
         }
-    });
-    if (possibleMoves.length === 0) {
-        console.log('no valid moves');
-    }
-    else{
-        return possibleMoves;
+        else{
+            return possibleMoves;
+        }
+    } catch (error) {
+        console.error('findmoves input', [x,y]);
     }
 }
+function clearVisited (){
+    visited = [];
+    for (i = 0; i < 8; i++){
+        visited.push(Array(8).fill(0,0));
+    }
+}
+function travail (start, dest){
 
-function travail ([x1,y1], [x2, y2]){
+    let q = [[start]];
 
+    while (q[0]){
+        let temp = q.shift();
+        const last = temp[temp.length-1];
+        if (last[0] === dest[0] && last[1] === dest[1]) {
+            return temp;
+        }
+
+        let moves = findMoves(last);
+        if (moves){
+            moves.forEach((move) => {
+                let copy = temp.map((x) => x);
+                copy.push(move);
+                q.push(copy);
+            });
+        }
+    }
+    console.log('no valid path');
 }
 
 buildBoard();
+clearVisited();
+console.log(travail([0,0], [5,3]));
